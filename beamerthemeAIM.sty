@@ -1,0 +1,279 @@
+% =====================================================================
+%  beamerthemeAIM.sty
+%  Beamer theme in the UM6P / AIM / UNESCO colours.
+%  Compile with pdfLaTeX (uses TeX Gyre Adventor and TeX Gyre Heros).
+%
+%  Commands provided
+%    \supervisor{...}          name shown on the title frame
+%    \director{...}            name shown on the title frame
+%    \titleframe               title page
+%    \outlineframe             table of contents built from \aimsection
+%    \aimsection{Title}{Short description}
+%                              starts a section, adds it to the outline
+%                              and shows a section divider frame
+%    \thankyouframe{contact line}
+%                              closing frame
+%    \metric{value}{label}     big number with a caption (results)
+%    \placeholder{w}{h}{text}  dashed box standing in for a figure
+% =====================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeAIM}[2026/10/19 AIM beamer theme]
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage[letterspace=120]{microtype}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}
+
+\graphicspath{{assets/}}
+\hyphenpenalty=10000 \exhyphenpenalty=10000
+\mode<presentation>
+
+% --------------------------------------------------------------- colours
+\definecolor{um6pRed}{HTML}{E93914}
+\definecolor{aimBlue}{HTML}{0027B2}
+\definecolor{unescoBlue}{HTML}{0277D4}
+\definecolor{softGrey}{HTML}{6B7280}
+\definecolor{inkGrey}{HTML}{1F2937}
+
+\setbeamercolor{normal text}{fg=inkGrey,bg=white}
+\setbeamercolor{structure}{fg=aimBlue}
+\setbeamercolor{alerted text}{fg=um6pRed}
+\setbeamercolor{example text}{fg=unescoBlue}
+\setbeamercolor{frametitle}{fg=aimBlue}
+\setbeamercolor{block title}{fg=white,bg=aimBlue}
+\setbeamercolor{block body}{fg=inkGrey,bg=aimBlue!5}
+\setbeamercolor{block title alerted}{fg=white,bg=um6pRed}
+\setbeamercolor{block body alerted}{fg=inkGrey,bg=um6pRed!6}
+\setbeamercolor{block title example}{fg=white,bg=unescoBlue}
+\setbeamercolor{block body example}{fg=inkGrey,bg=unescoBlue!6}
+
+% ----------------------------------------------------------------- fonts
+\usefonttheme{professionalfonts}
+\renewcommand{\sfdefault}{qag}% TeX Gyre Adventor (geometric, close to Poppins)
+\newcommand{\aimheadfont}{\fontfamily{qhv}\selectfont}% TeX Gyre Heros
+\newcommand{\aimlabelfont}{\sffamily\bfseries\lsstyle}
+\setbeamerfont{frametitle}{size=\Large}
+\setbeamerfont{block title}{size=\normalsize,series=\bfseries}
+
+% ------------------------------------------------------- general layout
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=0.9cm,text margin right=0.9cm}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{itemize item}{\color{um6pRed}\raisebox{0.25ex}{\rule{0.55ex}{0.55ex}}}
+\setbeamertemplate{itemize subitem}{\color{aimBlue}\raisebox{0.3ex}{\rule{0.45ex}{0.45ex}}}
+\setbeamertemplate{enumerate item}{\color{um6pRed}\bfseries\insertenumlabel.}
+\setbeamertemplate{caption}[numbered]
+\setbeamercolor{caption name}{fg=um6pRed}
+
+% ------------------------------------------------------ title metadata
+\newcommand{\aim@supervisor}{}
+\newcommand{\aim@director}{}
+\newcommand{\supervisor}[1]{\renewcommand{\aim@supervisor}{#1}}
+\newcommand{\director}[1]{\renewcommand{\aim@director}{#1}}
+
+% two-digit section number
+\newcommand{\aim@two}[1]{\ifnum#1<10 0\fi\number#1}
+
+% -------------------------------------------- content frame title
+\setbeamertemplate{frametitle}{%
+  \vskip0.45cm
+  \ifnum\value{section}>0
+    {\fontsize{5.5}{7}\aimlabelfont\color{um6pRed}%
+     \aim@two{\value{section}}\quad\insertsection\par}%
+    \vskip0.12cm
+  \fi
+  {\aimheadfont\bfseries\usebeamerfont{frametitle}\color{aimBlue}\insertframetitle\par}%
+  \ifx\beamer@framesubtitle\@empty\else
+    \vskip0.05cm{\small\color{softGrey}\insertframesubtitle\par}%
+  \fi
+  \vskip0.12cm
+  {\color{um6pRed}\rule{0.6cm}{0.6mm}}%
+  \vskip0.1cm
+}
+
+% --------------------------------------------------------------- footline
+\setbeamertemplate{footline}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[aimBlue!15,line width=0.4pt]
+      ($(current page.south west)+(0.9,0.55)$) -- ($(current page.south east)+(-0.9,0.55)$);
+    \node[anchor=west,inner sep=0pt,font=\fontsize{5}{6}\selectfont,text=softGrey]
+      at ($(current page.south west)+(0.9,0.3)$)
+      {\insertshortauthor\quad\textbullet\quad\insertshorttitle};
+    \node[anchor=east,inner sep=0pt,font=\fontsize{5.5}{6}\selectfont\bfseries]
+      at ($(current page.south east)+(-0.9,0.3)$)
+      {\textcolor{um6pRed}{\insertframenumber}\textcolor{softGrey}{\,/\,\inserttotalframenumber}};
+  \end{tikzpicture}%
+}
+
+% ======================================================== section registry
+% \aimsection writes each section to the .aux file so the outline frame
+% (which comes before the sections) can list them on the next run.
+\newcommand{\aim@nsec}{0}
+\newcommand{\aim@regsec}[3]{%
+  \expandafter\gdef\csname aim@sectitle@#1\endcsname{#2}%
+  \expandafter\gdef\csname aim@secdesc@#1\endcsname{#3}%
+  \xdef\aim@nsec{#1}}
+\newcommand{\aim@currentdesc}{}
+\newcommand{\aimsection}[2]{%
+  \gdef\aim@currentdesc{#2}%
+  \section{#1}%
+  \immediate\write\@auxout{\string\aim@regsec{\the\value{section}}%
+    {\unexpanded{#1}}{\unexpanded{#2}}}}
+\AtBeginDocument{\immediate\write\@auxout{\string\providecommand\string\aim@regsec[3]{}}}
+
+% ================================================================ title frame
+\newcommand{\titleframe}{%
+\begin{frame}[plain,noframenumbering]
+\begin{tikzpicture}[remember picture,overlay]
+  \coordinate (C) at ($(current page.west)+(5.81,0)$);
+  \node[anchor=north east,inner sep=0pt] at (current page.north east)
+    {\includegraphics[height=9cm]{network_blue.png}};
+  \node[inner sep=0pt] at ($(C)+(0,3.12)$)
+    {\includegraphics[width=6.14cm,trim=30 25 60 25,clip]{aim_logo.png}};
+  \node[text=aimBlue,align=center,font=\aimheadfont\bfseries\fontsize{22.5}{27}\selectfont]
+    at ($(C)+(0,1.23)$) {\inserttitle};
+  \fill[um6pRed,rounded corners=0.7pt] ($(C)+(-0.76,-0.28)$) rectangle ($(C)+(0.76,-0.355)$);
+  \node[align=center,anchor=north] at ($(C)+(-2.55,-1.04)$)
+    {{\fontsize{5}{6}\aimlabelfont\color{um6pRed}SUPERVISOR}\\[2.5pt]
+     {\fontsize{8}{10}\selectfont\color{aimBlue}\aim@supervisor}};
+  \node[align=center,anchor=north] at ($(C)+(2.08,-1.04)$)
+    {{\fontsize{5}{6}\aimlabelfont\color{um6pRed}THESIS DIRECTOR}\\[2.5pt]
+     {\fontsize{8}{10}\selectfont\color{aimBlue}\aim@director}};
+  \draw[softGrey!50,line width=0.4pt] ($(C)+(-0.425,-1.04)$) -- ($(C)+(-0.425,-1.75)$);
+  \node[align=center] at ($(C)+(0,-2.74)$)
+    {{\fontsize{5}{6}\aimlabelfont\color{um6pRed}PRESENTED BY}\\[2.5pt]
+     {\fontsize{9.5}{11}\selectfont\bfseries\color{aimBlue}\insertauthor}};
+  \node[font=\fontsize{5.7}{7}\selectfont,text=softGrey] at ($(C)+(0,-3.73)$) {\insertdate};
+\end{tikzpicture}
+\end{frame}}
+
+% ============================================================== outline frame
+% One outline entry; #1 position, #2 number, #3 title, #4 description
+\newcommand{\aim@tocitem}[4]{%
+  \draw[aimBlue!15,line width=0.5pt] ($#1$) -- ++(4.35,0);
+  \fill[um6pRed] ($#1$) rectangle ++(0.57,-0.04);
+  \node[anchor=north west,inner sep=0pt,text=um6pRed,
+        font=\bfseries\fontsize{14}{14}\selectfont] at ($#1+(0,-0.26)$) {#2};
+  \node[anchor=north west,inner sep=0pt,text width=3.25cm,align=left,text=aimBlue,
+        font=\bfseries\fontsize{8.5}{10}\selectfont] at ($#1+(1.04,-0.28)$) {#3};
+  \node[anchor=north west,inner sep=0pt,text width=3.25cm,align=left,text=softGrey,
+        font=\fontsize{5.5}{7}\selectfont] at ($#1+(1.04,-0.72)$) {#4};
+}
+
+\newcommand{\outlineframe}{%
+\begin{frame}[plain,noframenumbering]
+\begin{tikzpicture}[remember picture,overlay]
+  % side panel
+  \fill[aimBlue] (current page.south west) rectangle ($(current page.north west)+(4.96,0)$);
+  \begin{scope}
+    \clip (current page.south west) rectangle ($(current page.north west)+(4.96,0)$);
+    \node[anchor=north east,inner sep=0pt,opacity=0.12]
+      at ($(current page.north west)+(4.96,0)$) {\includegraphics[height=9cm]{network_white.png}};
+  \end{scope}
+  \coordinate (P) at ($(current page.north west)+(0.85,-2.46)$);
+  \node[anchor=north west,inner sep=0pt] at (P)
+    {{\fontsize{5}{6}\aimlabelfont\color{white!75!aimBlue}OUTLINE}};
+  \node[anchor=north west,inner sep=0pt,align=left,text=white,
+        font=\aimheadfont\bfseries\fontsize{21}{24}\selectfont] at ($(P)+(0,-0.42)$)
+    {Table of\\Contents};
+  \fill[um6pRed,rounded corners=0.7pt] ($(P)+(0,-2.22)$) rectangle ++(1.13,-0.07);
+  \node[anchor=north west,inner sep=0pt,text width=3.3cm,align=left,text=white!80!aimBlue,
+        font=\fontsize{6}{7.5}\selectfont] at ($(P)+(0,-2.6)$) {\beamer@shorttitle};
+  \node[anchor=south west,inner sep=0pt,text=white!70!aimBlue,font=\fontsize{5}{6}\selectfont]
+    at ($(current page.south west)+(0.85,0.57)$) {\insertshortauthor\quad$\cdot$\quad\insertdate};
+  % entries: two columns, filled top to bottom
+  \ifnum\aim@nsec>0
+    \pgfmathtruncatemacro{\aimrows}{ceil(\aim@nsec/2)}
+    \pgfmathsetmacro{\aimstep}{min(2.17,6.6/\aimrows)}
+    \pgfmathsetmacro{\aimtop}{-(9-(\aimrows-1)*\aimstep-1.6)/2}
+    \foreach \i in {1,...,\aim@nsec}{
+      \pgfmathtruncatemacro{\aimcol}{(\i-1)/\aimrows}
+      \pgfmathtruncatemacro{\aimrow}{mod(\i-1,\aimrows)}
+      \pgfmathsetmacro{\aimx}{6.14+\aimcol*4.82}
+      \pgfmathsetmacro{\aimy}{\aimtop-\aimrow*\aimstep}
+      \aim@tocitem{(current page.north west)+(\aimx,\aimy)}{\aim@two{\i}}
+        {\csname aim@sectitle@\i\endcsname}{\csname aim@secdesc@\i\endcsname}
+    }
+  \else
+    \node[text=softGrey,font=\fontsize{7}{9}\selectfont]
+      at ($(current page.center)+(2.5,0)$) {Compile twice to fill the outline.};
+  \fi
+\end{tikzpicture}
+\end{frame}}
+
+% ============================================================== section frame
+\AtBeginSection[]{%
+\begin{frame}[plain,noframenumbering]
+\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north east,inner sep=0pt,opacity=0.18] at (current page.north east)
+    {\includegraphics[height=9cm]{network_blue.png}};
+  \coordinate (S) at ($(current page.west)+(1.6,0)$);
+  \node[anchor=south west,inner sep=0pt,text=um6pRed,
+        font=\bfseries\fontsize{54}{54}\selectfont] at ($(S)+(0,0.55)$)
+    {\aim@two{\value{section}}};
+  \node[anchor=north west,inner sep=0pt,text=aimBlue,text width=10cm,align=left,
+        font=\aimheadfont\bfseries\fontsize{24}{28}\selectfont] at ($(S)+(0,0.25)$)
+    {\insertsection};
+  \fill[um6pRed,rounded corners=0.7pt] ($(S)+(0,-1.05)$) rectangle ++(1.13,-0.07);
+  \node[anchor=north west,inner sep=0pt,text width=9cm,align=left,text=softGrey,
+        font=\fontsize{8}{10}\selectfont] at ($(S)+(0,-1.4)$) {\aim@currentdesc};
+  % progress through the sections
+  \ifnum\aim@nsec>0
+    \foreach \i in {1,...,\aim@nsec}{
+      \ifnum\i=\value{section}
+        \fill[um6pRed,rounded corners=0.6pt]
+          ($(current page.south west)+(1.6+0.55*\i-0.55,0.8)$) rectangle ++(0.4,0.07);
+      \else
+        \fill[aimBlue!20,rounded corners=0.6pt]
+          ($(current page.south west)+(1.6+0.55*\i-0.55,0.8)$) rectangle ++(0.4,0.07);
+      \fi
+    }
+  \fi
+\end{tikzpicture}
+\end{frame}}
+
+% ============================================================ thank-you frame
+\newcommand{\thankyouframe}[1]{%
+\begin{frame}[plain,noframenumbering]
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[aimBlue] (current page.south west) rectangle (current page.north east);
+  \node[anchor=north east,inner sep=0pt,opacity=0.14] at (current page.north east)
+    {\includegraphics[height=9cm]{network_white.png}};
+  \coordinate (T) at ($(current page.west)+(1.6,0.6)$);
+  \node[anchor=south west,inner sep=0pt] at ($(T)+(0,1.75)$)
+    {{\fontsize{5.5}{7}\aimlabelfont\color{white!75!aimBlue}THE END}};
+  \node[anchor=south west,inner sep=0pt,text=white,
+        font=\aimheadfont\bfseries\fontsize{40}{44}\selectfont] at (T) {Thank you!};
+  \fill[um6pRed,rounded corners=0.7pt] ($(T)+(0,-0.35)$) rectangle ++(1.13,-0.07);
+  \node[anchor=north west,inner sep=0pt,text=white!85!aimBlue,
+        font=\fontsize{11}{13}\selectfont] at ($(T)+(0,-0.7)$) {Questions \& discussion};
+  \node[anchor=north west,inner sep=0pt,text=white!70!aimBlue,align=left,
+        font=\fontsize{6.5}{9}\selectfont] at ($(T)+(0,-1.55)$)
+    {\textbf{\insertauthor}\\#1};
+  \node[anchor=south west,inner sep=0pt]
+    at ($(current page.south west)+(1.6,0.8)$)
+    {\includegraphics[width=5.4cm,trim=30 25 60 25,clip]{aim_logo_white.png}};
+\end{tikzpicture}
+\end{frame}}
+
+% ================================================================== helpers
+\newcommand{\metric}[2]{%
+  \begin{tikzpicture}
+    \node[draw=aimBlue!15,line width=0.5pt,rounded corners=3pt,fill=aimBlue!4,
+          minimum width=3.2cm,minimum height=1.9cm,align=center] {%
+      {\fontsize{20}{22}\selectfont\bfseries\color{aimBlue}#1}\\[3pt]
+      {\fontsize{6}{7.5}\selectfont\color{softGrey}#2}};
+    \fill[um6pRed] ($(current bounding box.north west)+(0.3,0)$) rectangle ++(0.6,-0.05);
+  \end{tikzpicture}}
+
+\newcommand{\placeholder}[3]{%
+  \begin{tikzpicture}
+    \node[draw=aimBlue!35,dashed,line width=0.6pt,rounded corners=3pt,fill=aimBlue!3,
+          minimum width=#1,minimum height=#2,text=aimBlue!60,
+          font=\fontsize{7}{9}\selectfont,align=center] {#3};
+  \end{tikzpicture}}
+
+\mode<all>
+\endinput

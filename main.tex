@@ -1,0 +1,152 @@
+% =====================================================================
+%  main.tex  -  presentation using the AIM beamer theme
+%  Compile with XeLaTeX, twice (the outline is filled on the second run):
+%      xelatex main.tex && xelatex main.tex
+%  Files needed: beamerthemeAIM.sty and the assets/ folder.
+% =====================================================================
+\documentclass[aspectratio=169,11pt,t]{beamer}
+\usetheme{AIM}
+
+% -------------------------------------------------------------- metadata
+\title[Forecasting Hotspots for Predictive Police Patrolling]
+      {Forecasting Hotspots for\\Predictive Police Patrolling}
+\author[Ismail Elabbassi]{Ismail Elabbassi}
+\supervisor{Prof.\ Youness Mechqrane}
+\director{Prof.\ Amal El Fallah Seghrouchni}
+\date{October 2026}
+
+\begin{document}
+
+\titleframe
+\outlineframe
+
+% =====================================================================
+\aimsection{Introduction}{Context, motivation and research questions}
+
+\begin{frame}{Context and motivation}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.55\textwidth}
+      \begin{itemize}
+        \item Placeholder point about the problem setting
+        \item Why forecasting crime hotspots matters
+        \begin{itemize}
+          \item Sub point one
+          \item Sub point two
+        \end{itemize}
+        \item Limits of current patrol planning
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \centering
+      \placeholder{5.2cm}{3.6cm}{Figure placeholder\\city map, photo, \dots}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Research questions}
+  \begin{enumerate}
+    \item Can we forecast where crime will concentrate in the next period?
+    \item Which features drive these forecasts?
+    \item How should patrols be allocated given the forecasts?
+  \end{enumerate}
+  \vskip0.4cm
+  \begin{block}{Main contribution}
+    One sentence that states the contribution of the work.
+  \end{block}
+\end{frame}
+
+% =====================================================================
+\aimsection{Related Work}{Crime hotspot mapping and predictive policing}
+
+\begin{frame}{Related work}{How this work is positioned}
+  \small
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    \textbf{Approach} & \textbf{Spatial} & \textbf{Temporal} & \textbf{Patrol planning}\\
+    \midrule
+    Kernel density estimation & \checkmark & & \\
+    Self-exciting point processes & \checkmark & \checkmark & \\
+    Deep spatio-temporal models & \checkmark & \checkmark & \\
+    \textcolor{aimBlue}{\textbf{This work}} & \checkmark & \checkmark & \checkmark\\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+% =====================================================================
+\aimsection{Data \& Study Area}{Crime records, features and preprocessing}
+
+\begin{frame}{Dataset}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \placeholder{6.3cm}{3.8cm}{Map of the study area}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \item Source and time span of the records
+        \item Spatial grid resolution
+        \item Features: history, calendar, points of interest
+        \item Train / validation / test split
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+\aimsection{Methodology}{Forecasting models and patrol allocation}
+
+\begin{frame}{Forecasting model}
+  The predicted intensity of cell $i$ at time $t$ is
+  \[
+    \hat{\lambda}_{i,t} = f_\theta\big(x_{i,t-1}, \dots, x_{i,t-k}\big),
+  \]
+  and patrols are allocated to the cells with the highest $\hat{\lambda}_{i,t}$.
+  \vskip0.4cm
+  \begin{exampleblock}{Intuition}
+    Short explanation of the model in plain words.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Pipeline}
+  \centering
+  \placeholder{12.5cm}{4.2cm}{Pipeline diagram: data $\rightarrow$ features $\rightarrow$ model $\rightarrow$ patrol plan}
+\end{frame}
+
+% =====================================================================
+\aimsection{Results}{Experiments, metrics and comparison}
+
+\begin{frame}{Main results}
+  \centering
+  \metric{0.82}{Hit rate at 5\% area}\hfill
+  \metric{+14\%}{Over the best baseline}\hfill
+  \metric{2.3$\times$}{Predictive accuracy index}
+  \vskip0.5cm
+  \begin{alertblock}{Takeaway}
+    One sentence that the audience should remember from the results.
+  \end{alertblock}
+\end{frame}
+
+% =====================================================================
+\aimsection{Conclusion}{Takeaways, limitations and future work}
+
+\begin{frame}{Conclusion and future work}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{aimBlue}Takeaways}
+      \begin{itemize}
+        \item First takeaway
+        \item Second takeaway
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{aimBlue}Future work}
+      \begin{itemize}
+        \item First direction
+        \item Second direction
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\thankyouframe{your.email@um6p.ma}
+
+\end{document}
